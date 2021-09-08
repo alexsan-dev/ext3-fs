@@ -1,0 +1,28 @@
+mkdisk -size=75 -u=M -path=/Disco01.disk -f=FF
+mkdisk -u=K -size=51200 -path=/Disco02.disk -f=FF
+
+fdisk -type=P -u=M -name=Part1 -size=20 -path=/Disco01.disk -f=FF
+fdisk -type=E -u=M -name=Part2 -size=10 -path=/Disco01.disk -f=FF
+fdisk -type=L -u=M -name=Part2L -size=5 -path=/Disco01.disk -f=FF
+
+mount -path=/Disco01.disk -name=Part1 
+mount -path=/Disco01.disk -name=Part2L
+
+mkfs -type=full -id=173C -fs=3fs
+mkfs -type=full -id=173D -fs=3fs
+
+login -user=root -pwd=123 -id=173D
+
+mkusr -usr=user -pwd=123 -grp=root
+mkgrp -name=test
+mkgrp -name=test2
+mkusr -usr=daniel -pwd=123 -grp=test2
+mkusr -usr=alex -pwd=123 -grp=test
+
+logout
+login -user=alex -pwd=123 -id=173D
+
+mkdir -path=/home
+mkdir -path=/home/alex 
+
+chmod -path=/home -ugo=777 -r
