@@ -51,14 +51,15 @@ void read_test() {
 
 int main(int argc, char *argv[]) {
   // LEER DE STDIN
-  string content;
-  string lineInput;
-  while (getline(cin, lineInput)) {
-    content += lineInput;
-  }
+  // string content;
+  // string lineInput;
+  // while (getline(cin, lineInput)) {
+  // content += lineInput;
+  //}
 
   // ASIGNAR A GLOBAL
-  stdin_content = content;
+  // stdin_content = content;
 
   read_test();
+  print_disks();
 }

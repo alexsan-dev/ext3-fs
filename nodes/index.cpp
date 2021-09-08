@@ -806,23 +806,21 @@ void node_commands::mkfile(string content, string path, bool create) {
 
       // CORTAR BLOQUES ANTES
       string next_content = content;
-      string content_block[content_block_count];
+      char content_block[content_block_count][sizeof(FileBlock)];
 
       for (int block_index = 0; block_index < content_block_count;
            block_index++) {
-        string tmp_block;
-
         // DIVIDIR BLOQUES EN 63 BYTES
-        for (int char_index = (sizeof(FileBlock) - 1) * block_index;
-             char_index < ((sizeof(FileBlock) - 1) * (block_index + 1));
-             char_index++) {
-          if (char_index < next_content.size()) {
-            tmp_block += next_content.at(char_index);
-          }
-        }
+        int max_length =
+            (sizeof(FileBlock) - 1) * (block_index + 1) < next_content.size()
+                ? (sizeof(FileBlock) - 1) * (block_index + 1)
+                : next_content.size();
+        int initial_sub = (sizeof(FileBlock) - 1) * block_index;
+        string tmp_block = next_content.substr(initial_sub, max_length);
 
         // AGREGAR
-        content_block[block_index] = tmp_block;
+        snprintf(content_block[block_index], sizeof(FileBlock), "%s",
+                 tmp_block.c_str());
       }
 
       // RECORRER BLOQUES
@@ -830,7 +828,7 @@ void node_commands::mkfile(string content, string path, bool create) {
            block_index++) {
         FileBlock file_block;
         snprintf(file_block.content, sizeof(FileBlock), "%s",
-                 content_block[block_index].c_str());
+                 content_block[block_index]);
 
         // BUSCAR NUEVO BLOQUE LIBRE Y OCUPARLO
         int free_file_block = 0;

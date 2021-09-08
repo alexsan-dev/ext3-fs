@@ -124,60 +124,62 @@ void disk_commands::mkdisk(DiskCommandsProps props) {
       string disk_content = "";
       FILE *disk_file = fopen(props.path.c_str(), "wb");
 
-      // CREAR FECHA
-      string current_date = get_now();
-      strcpy(mbr_data.date, current_date.c_str());
-
-      // ASIGNAR PROPIEDADES DEL MASTER BOOT
-      mbr_data.fit = props.fit;
-      mbr_data.size =
-          props.unit == 'K' ? props.size * 1024 : props.size * 1024 * 1024;
-      mbr_data.signature = rand() % 10;
-
-      // CREAR ARCHIVO EBR INICIAL
-      string partition_name = "-";
-      strcpy(ebr_data.name, partition_name.c_str());
-      ebr_data.status = '0';
-      ebr_data.start = -1;
-      ebr_data.fit = 'W';
-      ebr_data.size = -1;
-      ebr_data.next = -1;
-
-      // CREAR PARTICIONES DEL MBR
-      Partition empty_partition;
-      strcpy(empty_partition.name, partition_name.c_str());
-      empty_partition.status = '0';
-      empty_partition.type = 'P';
-      empty_partition.start = -1;
-      empty_partition.size = -1;
-      empty_partition.fit = 'W';
-
-      // AGREGAR PARTICION VACIA
-      for (int i = 0; i < 4; i++)
-        mbr_data.partitions[i] = empty_partition;
-
-      // AGREGAR AL DISCO
       if (disk_file != NULL) {
-        // CREAR UN KB DE 0
-        for (int i = 0; i < 1024; i++)
-          buffer[i] = '\0';
+        // CREAR FECHA
+        string current_date = get_now();
+        strcpy(mbr_data.date, current_date.c_str());
 
-        // RELLENAR EL RESTO CON 0
-        for (int byte_index = 0;
-             byte_index < (props.size * (props.unit == 'K' ? 1 : 1024));
-             byte_index++)
-          fwrite(&buffer, 1024, 1, disk_file);
+        // ASIGNAR PROPIEDADES DEL MASTER BOOT
+        mbr_data.fit = props.fit;
+        mbr_data.size =
+            props.unit == 'K' ? props.size * 1024 : props.size * 1024 * 1024;
+        mbr_data.signature = rand() % 10;
 
-        // GUARDAR MBR
-        fseek(disk_file, 0, SEEK_SET);
-        fwrite(&mbr_data, sizeof(MBR), 1, disk_file);
+        // CREAR ARCHIVO EBR INICIAL
+        string partition_name = "-";
+        strcpy(ebr_data.name, partition_name.c_str());
+        ebr_data.status = '0';
+        ebr_data.start = -1;
+        ebr_data.fit = 'W';
+        ebr_data.size = -1;
+        ebr_data.next = -1;
 
-        // GUARDAR EBR
-        fseek(disk_file, sizeof(MBR) + 1, SEEK_SET);
-        fwrite(&ebr_data, sizeof(EBR), 1, disk_file);
+        // CREAR PARTICIONES DEL MBR
+        Partition empty_partition;
+        strcpy(empty_partition.name, partition_name.c_str());
+        empty_partition.status = '0';
+        empty_partition.type = 'P';
+        empty_partition.start = -1;
+        empty_partition.size = -1;
+        empty_partition.fit = 'W';
 
-        // CERRAR
-        fclose(disk_file);
+        // AGREGAR PARTICION VACIA
+        for (int i = 0; i < 4; i++)
+          mbr_data.partitions[i] = empty_partition;
+
+        // AGREGAR AL DISCO
+        if (disk_file != NULL) {
+          // CREAR UN KB DE 0
+          for (int i = 0; i < 1024; i++)
+            buffer[i] = '\0';
+
+          // RELLENAR EL RESTO CON 0
+          for (int byte_index = 0;
+               byte_index < (props.size * (props.unit == 'K' ? 1 : 1024));
+               byte_index++)
+            fwrite(&buffer, 1024, 1, disk_file);
+
+          // GUARDAR MBR
+          fseek(disk_file, 0, SEEK_SET);
+          fwrite(&mbr_data, sizeof(MBR), 1, disk_file);
+
+          // GUARDAR EBR
+          fseek(disk_file, sizeof(MBR) + 1, SEEK_SET);
+          fwrite(&ebr_data, sizeof(EBR), 1, disk_file);
+
+          // CERRAR
+          fclose(disk_file);
+        }
       } else
         print_err("DISK_ERR", "El disco no se pudo crear.");
     } else

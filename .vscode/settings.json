@@ -51,7 +51,8 @@
         "scoped_allocator": "cpp",
         "variant": "cpp",
         "typeindex": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "forward_list": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

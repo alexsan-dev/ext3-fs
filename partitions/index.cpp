@@ -490,13 +490,16 @@ void partition_commands::fdisk(PartitionCommandsProps props, bool preserve) {
 
                 // BORRADO COMPLETO
                 if (props.del == "full") {
-                  // LLENAR BYES CON 0
+                  // LLENAR BYTES CON 0
                   int partition_size =
                       logical_partitions[searched_logical_partition_index]
                           .next -
                       (logical_partitions[searched_logical_partition_index]
-                           .start -
-                       1);
+                           .start);
+                  if (preserve) {
+                    partition_size -= sizeof(EBR);
+                  }
+
                   char new_content_bytes[1024];
                   for (int i = 0; i < 1024; i++)
                     new_content_bytes[i] = '\0';
@@ -504,7 +507,8 @@ void partition_commands::fdisk(PartitionCommandsProps props, bool preserve) {
                   // BORRAR PARTICION COMPLETA
                   fseek(disk_file,
                         logical_partitions[searched_logical_partition_index]
-                            .start,
+                                .start +
+                            (preserve ? sizeof(EBR) : 0),
                         SEEK_SET);
 
                   for (int bytes_index = 0; bytes_index < partition_size / 1024;
@@ -616,6 +620,11 @@ void partition_commands::mount(string path, string name) {
         // PARTICION ENCONTRADA
         if (name_founded) {
           MountedPartition partition;
+          int partition_start =
+              (searched_logical_partition_index != -1 ? sizeof(EBR) : 0) +
+              (searched_logical_partition_index != -1
+                   ? logical_partitions[searched_logical_partition_index].start
+                   : mbr_data.partitions[searched_partition_index].start);
           string partition_name;
           char partition_letter = 67 + mounted_partitions.size();
           string partition_id = to_string(mounted_prefix) +
@@ -634,11 +643,7 @@ void partition_commands::mount(string path, string name) {
           partition.name = partition_name;
           partition.id = partition_id;
           partition.path = path;
-          partition.start =
-              (mbr_data.partitions[searched_partition_index].type == 'L'
-                   ? sizeof(EBR)
-                   : 0) +
-              mbr_data.partitions[searched_partition_index].start;
+          partition.start = partition_start;
           partition.size = mbr_data.partitions[searched_partition_index].size;
           partition.type = mbr_data.partitions[searched_partition_index].type;
 
@@ -763,7 +768,6 @@ void partition_commands::mkfs(PartitionFsProps props) {
         // CREAR SUPERBLOQUE
         SuperBlock superblock;
         int fs_type = (int)(props.fs.at(0) - '0');
-        int ebr_size = current_partition.type == 'L' ? sizeof(EBR) : 0;
 
         superblock.mount_count = 1;
         superblock.magic = 0xEF53;
@@ -775,7 +779,7 @@ void partition_commands::mkfs(PartitionFsProps props) {
         superblock.free_blocks_count = (3 * n) - 2;
         superblock.inode_size = sizeof(Inode);
         superblock.block_size = sizeof(FileBlock);
-        superblock.bm_inode_start = ebr_size + current_partition.start +
+        superblock.bm_inode_start = current_partition.start +
                                     sizeof(SuperBlock) +
                                     (fs_type == 3 ? 100 * sizeof(Journal) : 0);
         superblock.filesystem_type = fs_type;
@@ -788,7 +792,7 @@ void partition_commands::mkfs(PartitionFsProps props) {
         string current_date = get_now();
         strcpy(superblock.umtime, def_time.c_str());
 
-        fseek(disk_file, ebr_size + current_partition.start, SEEK_SET);
+        fseek(disk_file, current_partition.start, SEEK_SET);
         fwrite(&superblock, sizeof(SuperBlock), 1, disk_file);
 
         // CREAR INODOS Y BLOQUES
@@ -809,8 +813,7 @@ void partition_commands::mkfs(PartitionFsProps props) {
 
         // JOURNALING
         if (fs_type == 3) {
-          int journalstart =
-              (ebr_size + current_partition.start + sizeof(SuperBlock));
+          int journalstart = (current_partition.start + sizeof(SuperBlock));
           Journal journal_data;
           journal_data.operation[0] = '-';
           journal_data.content[0] = '\0';
@@ -827,7 +830,9 @@ void partition_commands::mkfs(PartitionFsProps props) {
           }
         }
 
-        // CREAR RUTA /
+        fclose(disk_file);
+
+        // CREAR RUTA
         node_commands *nodes_cmd = new node_commands();
         nodes_cmd->mkdir("/", 0);
 
@@ -843,7 +848,6 @@ void partition_commands::mkfs(PartitionFsProps props) {
         global_user.id = "";
         global_user.gid = "";
 
-        fclose(disk_file);
       } else
         print_err("PART_ERR", "El disco no existe.");
     } else
