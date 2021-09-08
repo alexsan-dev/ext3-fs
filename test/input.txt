@@ -11,7 +11,7 @@ mount -path=/Disco01.disk -name=Part2L
 mkfs -type=full -id=173C -fs=3fs
 mkfs -type=full -id=173D -fs=3fs
 
-login -user=root -pwd=123 -id=173D
+login -usr=root -pwd=123 -id=173D
 
 mkusr -usr=user -pwd=123 -grp=root
 mkgrp -name=test
@@ -19,10 +19,8 @@ mkgrp -name=test2
 mkusr -usr=daniel -pwd=123 -grp=test2
 mkusr -usr=alex -pwd=123 -grp=test
 
-logout
-login -user=alex -pwd=123 -id=173D
-
 mkdir -path=/home
 mkdir -path=/home/alex 
 
 chmod -path=/home -ugo=777 -r
+touch -path=/home/test/test.txt -r -cont=/home/alex/Documentos/USAC/MIA/proyecto01_mia/test/file.txt

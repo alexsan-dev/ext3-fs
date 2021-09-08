@@ -68,29 +68,32 @@ extern int yydebug;
     mkusr = 269,
     rmusr = 270,
     chmod = 271,
-    mkdir = 272,
-    sizeP = 273,
-    path = 274,
-    unit = 275,
-    fit = 276,
-    type = 277,
-    name = 278,
-    add = 279,
-    del = 280,
-    idP = 281,
-    pPr = 282,
-    fs = 283,
-    pwd = 284,
-    user = 285,
-    usr = 286,
-    grp = 287,
-    ugo = 288,
-    rPr = 289,
-    likepath = 290,
-    strtext = 291,
-    letter = 292,
-    number = 293,
-    word = 294
+    touch = 272,
+    mkdir = 273,
+    sizeP = 274,
+    path = 275,
+    unit = 276,
+    fit = 277,
+    type = 278,
+    name = 279,
+    add = 280,
+    del = 281,
+    idP = 282,
+    pPr = 283,
+    fs = 284,
+    pwd = 285,
+    user = 286,
+    usr = 287,
+    grp = 288,
+    ugo = 289,
+    rPr = 290,
+    cont = 291,
+    stdinR = 292,
+    likepath = 293,
+    strtext = 294,
+    letter = 295,
+    number = 296,
+    word = 297
   };
 #endif
 
@@ -107,10 +110,11 @@ union YYSTYPE
     struct UserCommandsProps *USRCMDPROPS;
     struct MkUserProps *MKUSRCMDPROPS;
     struct ChmodProps *CHMODCMDPROPS;
+    struct TouchProps *TOUCHCMDPROPS;
     struct PropVariant PROP;
     char *TEXT;
 
-#line 114 "parser.h" /* yacc.c:1909  */
+#line 118 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

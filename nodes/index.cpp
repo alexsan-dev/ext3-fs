@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <vector>
 
 using namespace std;
@@ -600,6 +601,7 @@ void node_commands::mkdir(string path, bool create) {
 /**
  * Crear archivo
  * @brief Crea un archivo en el sistema de archivos
+ * @param {string} content
  * @param {string} path
  * @param {bool} create
  */
@@ -804,7 +806,7 @@ void node_commands::mkfile(string content, string path, bool create) {
 
       // CORTAR BLOQUES ANTES
       string next_content = content;
-      string content_block[2];
+      string content_block[content_block_count];
 
       for (int block_index = 0; block_index < content_block_count;
            block_index++) {
@@ -936,4 +938,50 @@ void node_commands::mkfile(string content, string path, bool create) {
     fclose(disk_file);
   } else
     print_err("NODES_ERR", "El disco no existe.");
+}
+
+/**
+ * Crear archivo extendido
+ * @brief Crear contenido para mkfile
+ * @param {TouchProps} props
+ */
+void node_commands::touch(TouchProps props) {
+  if (props.path.length() > 0) {
+    struct stat sb {};
+    string file_content;
+
+    if (props.cont.length() > 0) {
+      FILE *local_file = fopen(props.cont.c_str(), "r");
+      if (local_file != NULL) {
+        // OBTENER CONTENIDO
+        stat(props.cont.c_str(), &sb);
+        file_content.resize(sb.st_size);
+
+        fread(const_cast<char *>(file_content.data()), sb.st_size, 1,
+              local_file);
+        fclose(local_file);
+      }
+
+    } else if (props.stdinR) {
+
+    } else {
+      // CONTENIDO CON SIZE
+      if (props.size >= 0) {
+        int counter = 0;
+        for (int char_index = 0; char_index < props.size; char_index++) {
+          file_content += to_string(counter);
+          if (counter < 9) {
+            counter++;
+          } else {
+            counter = 0;
+          }
+        }
+      } else
+        print_err("USER_ERR", "El parametro size debe no debe ser negativo.");
+    }
+
+    // CREAR
+    mkfile(file_content, props.path, props.r);
+  } else
+    print_err("USER_ERR", "El parametro path es obligatorio.");
 }

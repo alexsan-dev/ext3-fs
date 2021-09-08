@@ -9,6 +9,28 @@
 
 using namespace std;
 
+struct TouchProps {
+  string path;
+  bool r = 0;
+  int size = 0;
+  bool stdinR = 0;
+  string cont = "";
+
+  void set_prop(string value, string key) {
+    if (key == "path") {
+      path = value;
+    } else if (key == "r") {
+      r = 1;
+    } else if (key == "size") {
+      size = (int)stoi(value);
+    } else if (key == "stdin") {
+      stdinR = 1;
+    } else if (key == "cont") {
+      cont = value;
+    }
+  }
+};
+
 // COMANDOS
 class node_commands {
 public:
@@ -17,6 +39,7 @@ public:
   // METODOS
   void mkdir(string path, bool create);
   void mkfile(string content, string path, bool create);
+  void touch(TouchProps props);
 };
 
 extern void get_tree_graph();

@@ -31,7 +31,7 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "RMDISK" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rmdisk;}
 "FDISK" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return fdisk;}
 "MOUNT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mount;}
-"UNMOUNT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return unmount;}
+"UMOUNT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return unmount;}
 "MKFS" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mkfs;}
 "LOGIN" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return login;}
 "LOGOUT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return logout;}
@@ -40,6 +40,7 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "MKUSR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mkusr;}
 "RMUSR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rmusr;}
 "CHMOD" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return chmod;}
+"TOUCH" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return touch;}
 "MKDIR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mkdir;}
 
 "-DELETE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return del;}
@@ -59,6 +60,8 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "-GRP" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return grp;}
 "-UGO" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return ugo;}
 "-R" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rPr;}
+"-CONT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return cont;}
+"-STDIN" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return stdinR;}
 
 {word} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return word;}
 {letter} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return letter;}

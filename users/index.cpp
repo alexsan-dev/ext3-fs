@@ -196,7 +196,7 @@ void user_commands::login(UserCommandsProps props) {
     } else
       print_err("USER_ERR", "El parametro pwd es obligatorio.");
   } else
-    print_err("USER_ERR", "El parametro user es obligatorio.");
+    print_err("USER_ERR", "El parametro usr es obligatorio.");
 }
 
 /**
@@ -293,7 +293,7 @@ void user_commands::mkusr(MkUserProps props) {
     } else
       print_err("USER_ERR", "El parametro pwd es obligatorio.");
   } else
-    print_err("USER_ERR", "El parametro user es obligatorio.");
+    print_err("USER_ERR", "El parametro usr es obligatorio.");
 }
 
 /**
@@ -345,5 +345,5 @@ void user_commands::rmusr(string user) {
     } else
       print_err("USERS_ERR", "Este comando solo se ejecuta desde root.");
   } else
-    print_err("USER_ERR", "El parametro user es obligatorio.");
+    print_err("USER_ERR", "El parametro usr es obligatorio.");
 }

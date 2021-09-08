@@ -52,6 +52,7 @@ int yyerror(const char* mens) {
     struct UserCommandsProps *USRCMDPROPS;
     struct MkUserProps *MKUSRCMDPROPS;
     struct ChmodProps *CHMODCMDPROPS;
+    struct TouchProps *TOUCHCMDPROPS;
     struct PropVariant PROP;
     char *TEXT;
 }
@@ -73,6 +74,7 @@ int yyerror(const char* mens) {
 %token<TEXT> mkusr;
 %token<TEXT> rmusr;
 %token<TEXT> chmod;
+%token<TEXT> touch;
 %token<TEXT> mkdir;
 
 %token<TEXT> sizeP;
@@ -92,6 +94,8 @@ int yyerror(const char* mens) {
 %token<TEXT> grp;
 %token<TEXT> ugo;
 %token<TEXT> rPr;
+%token<TEXT> cont;
+%token<TEXT> stdinR;
 
 /* TIPOS GENERALES */
 %token<TEXT> likepath;
@@ -130,7 +134,6 @@ int yyerror(const char* mens) {
 /* OPCIONES LOGIN */
 %type<USRCMDPROPS> LOGINPROPS;
 %type<PROP> LOGINPROP;
-%type<TEXT> USERPARAM;
 %type<TEXT> PWDPARAM;
 
 /* OPCIONES MKUSER */
@@ -143,6 +146,12 @@ int yyerror(const char* mens) {
 %type<CHMODCMDPROPS> CHMODPROPS;
 %type<PROP> CHMODPROP;
 %type<TEXT> UGOPARAM;
+
+/* OPCIONES TOUCH */
+%type<TOUCHCMDPROPS> TOUCHPROPS;
+%type<PROP> TOUCHPROP;
+%type<TEXT> CONTPARAM;
+%type<TEXT> STDINPARAM;
 
 %start START
 
@@ -183,7 +192,7 @@ COMMANDS : COMMANDS COMMAND | COMMAND { };
 COMMAND : MKDISKCMD | RMDISKCMD | FDISKCMD 
 | MOUNTCMD | UNMOUNTCMD | MKFSCMD | MKDIRCMD 
 | LOGINCMD | LOGOUTCMD | MKUSRCMD | MKGRPCMD 
-| RMGRPCMD | RMUSRCMD | CHMODCMD { };
+| RMGRPCMD | RMUSRCMD | CHMODCMD | TOUCHCMD { };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDISK */
@@ -317,10 +326,9 @@ LOGINPROPS : LOGINPROP {
 };
 
 LOGINPROP : IDPARAM { $$ = set_prop($1, (char*) "id"); }
-| USERPARAM { $$ = set_prop($1, (char*) "user"); }
+| USRPARAM { $$ = set_prop($1, (char*) "user"); }
 | PWDPARAM { $$ = set_prop($1, (char*) "pwd"); };
 
-USERPARAM : user equals STRVALUE { $$ = $3; };
 PWDPARAM : pwd equals STRVALUE { $$ = $3; } | pwd equals number { $$ = $3; };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
@@ -401,6 +409,32 @@ CHMODPROP : PATHPARAM { $$ = set_prop($1, (char*) "path"); }
 | rPr { $$ = set_prop($1, (char*) "r"); };
 
 UGOPARAM : ugo equals STRVALUE { $$ = $3; } | ugo equals number { $$ = $3; };
+
+/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
+/* TOUCH */
+TOUCHCMD : touch TOUCHPROPS { 
+    node_commands *node_cmd = new node_commands();
+    node_cmd->touch(*$2); 
+    delete node_cmd;
+};
+
+TOUCHPROPS : TOUCHPROP {
+    TouchProps *props = new TouchProps();
+    props->set_prop($1.value, $1.name);
+    $$ = props;
+} | TOUCHPROPS TOUCHPROP {
+    $1->set_prop($2.value, $2.name);
+    $$ = $1;
+};
+
+TOUCHPROP : PATHPARAM { $$ = set_prop($1, (char*) "path"); }
+| STDINPARAM { $$ = set_prop($1, (char*) "stdin"); }
+| SIZEPARAM { $$ = set_prop($1, (char*) "size"); }
+| CONTPARAM { $$ = set_prop($1, (char*) "cont"); }
+| rPr { $$ = set_prop($1, (char*) "r"); };
+
+CONTPARAM : cont equals STRVALUE { $$ = $3; };
+STDINPARAM : stdinR equals STRVALUE { $$ = $3; };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDIR */
