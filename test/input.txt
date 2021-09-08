@@ -24,3 +24,4 @@ mkdir -path=/home/alex
 
 chmod -path=/home -ugo=777 -r
 touch -path=/home/test/test.txt -r -cont=/home/alex/Documentos/USAC/MIA/proyecto01_mia/test/file.txt
+touch -path=/home/test/test2.txt -stdin

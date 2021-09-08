@@ -963,7 +963,7 @@ void node_commands::touch(TouchProps props) {
       }
 
     } else if (props.stdinR) {
-
+      file_content = stdin_content;
     } else {
       // CONTENIDO CON SIZE
       if (props.size >= 0) {

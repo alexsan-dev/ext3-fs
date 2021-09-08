@@ -16,5 +16,6 @@ struct User : UserCommandsProps {
 
 extern deque<MountedPartition> mounted_partitions;
 extern struct User global_user;
+extern string stdin_content;
 
 #endif // GLOBAL_H

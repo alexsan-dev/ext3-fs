@@ -151,7 +151,6 @@ int yyerror(const char* mens) {
 %type<TOUCHCMDPROPS> TOUCHPROPS;
 %type<PROP> TOUCHPROP;
 %type<TEXT> CONTPARAM;
-%type<TEXT> STDINPARAM;
 
 %start START
 
@@ -428,13 +427,12 @@ TOUCHPROPS : TOUCHPROP {
 };
 
 TOUCHPROP : PATHPARAM { $$ = set_prop($1, (char*) "path"); }
-| STDINPARAM { $$ = set_prop($1, (char*) "stdin"); }
 | SIZEPARAM { $$ = set_prop($1, (char*) "size"); }
 | CONTPARAM { $$ = set_prop($1, (char*) "cont"); }
-| rPr { $$ = set_prop($1, (char*) "r"); };
+| rPr { $$ = set_prop($1, (char*) "r"); }
+| stdinR { $$ = set_prop($1, (char*) "stdin"); };
 
 CONTPARAM : cont equals STRVALUE { $$ = $3; };
-STDINPARAM : stdinR equals STRVALUE { $$ = $3; };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDIR */

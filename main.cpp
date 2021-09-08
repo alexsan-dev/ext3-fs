@@ -12,6 +12,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -48,4 +49,16 @@ void read_test() {
   get_tree_graph();
 }
 
-int main(int argc, char *argv[]) { read_test(); }
+int main(int argc, char *argv[]) {
+  // LEER DE STDIN
+  string content;
+  string lineInput;
+  while (getline(cin, lineInput)) {
+    content += lineInput;
+  }
+
+  // ASIGNAR A GLOBAL
+  stdin_content = content;
+
+  read_test();
+}
