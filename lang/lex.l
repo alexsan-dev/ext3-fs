@@ -41,6 +41,7 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "RMUSR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rmusr;}
 "CHMOD" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return chmod;}
 "TOUCH" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return touch;}
+"CAT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return cat;}
 "MKDIR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mkdir;}
 
 "-DELETE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return del;}
@@ -62,12 +63,15 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "-R" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rPr;}
 "-CONT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return cont;}
 "-STDIN" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return stdinR;}
+"-FILE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return filePr;}
 
 {word} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return word;}
 {letter} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return letter;}
 {likepath} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return likepath;}
 {strtext} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return strtext;}
 {number} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return number;}
+
+"#"[^"\n"]* {col += prevC; prevC = strlen(yytext); yylval.TEXT = yytext; return comment;}
 
 "=" {col += prevC; prevC = strlen(yytext); yylval.TEXT = yytext; return equals;}
 

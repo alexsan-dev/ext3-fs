@@ -21,7 +21,6 @@ void permission_commands::chmod(ChmodProps props) {
       int others_perm = (int)(props.ugo.at(2) - '0');
 
       if (users_perm <= 7 && groups_perm <= 7 && others_perm <= 7) {
-
         MountedPartition current_partition =
             get_current_partition(global_user.id);
 
@@ -78,13 +77,41 @@ void permission_commands::chmod(ChmodProps props) {
             }
           }
 
+          // BUSCAR SI ES UNA CARPETA O UN ARCHIVO
+          Inode first_inode = parent_inode;
+          for (int block_index = 0; block_index < 15; block_index++) {
+            if (first_inode.block[block_index] != -1) {
+              DirBlock dir_block;
+              bool find_block = 0;
+              fseek(disk_file, first_inode.block[block_index], SEEK_SET);
+              fread(&dir_block, sizeof(DirBlock), 1, disk_file);
+
+              // RECORRER CONTENIDO
+              for (int content_index = 0; content_index < 4; content_index++) {
+                if (dir_block.content[content_index].name ==
+                    path_components.at(path_components.size() - 1)) {
+                  inode_start = dir_block.content[content_index].inodo;
+                  fseek(disk_file, inode_start, SEEK_SET);
+                  fread(&first_inode, sizeof(Inode), 1, disk_file);
+
+                  find_block = 1;
+                  break;
+                }
+              }
+
+              if (find_block) {
+                break;
+              }
+            }
+          }
+
           // VERIFICAR SI EL INODO PERTENECE AL USUARIO
-          if (parent_inode.uid == (int)stoi(global_user.uid) ||
+          if (first_inode.uid == (int)stoi(global_user.uid) ||
               global_user.grp == "root") {
             // RECORRER BLOQUES
             deque<Inode> inodes;
             deque<int> inode_starts;
-            inodes.push_back(parent_inode);
+            inodes.push_back(first_inode);
             inode_starts.push_back(inode_start);
             int inode_counter = 0;
 

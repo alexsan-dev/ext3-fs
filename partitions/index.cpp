@@ -736,7 +736,7 @@ void partition_commands::mkfs(PartitionFsProps props) {
     global_user.uid = "1";
     global_user.user = "root";
     global_user.pwd = "123";
-    global_user.grp = "1";
+    global_user.grp = "root";
     global_user.id = current_partition.id;
     global_user.gid = "1";
 

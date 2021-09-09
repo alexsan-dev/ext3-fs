@@ -53,6 +53,7 @@ int yyerror(const char* mens) {
     struct MkUserProps *MKUSRCMDPROPS;
     struct ChmodProps *CHMODCMDPROPS;
     struct TouchProps *TOUCHCMDPROPS;
+    struct ListProp *FILELIST;
     struct PropVariant PROP;
     char *TEXT;
 }
@@ -75,6 +76,7 @@ int yyerror(const char* mens) {
 %token<TEXT> rmusr;
 %token<TEXT> chmod;
 %token<TEXT> touch;
+%token<TEXT> cat;
 %token<TEXT> mkdir;
 
 %token<TEXT> sizeP;
@@ -96,6 +98,7 @@ int yyerror(const char* mens) {
 %token<TEXT> rPr;
 %token<TEXT> cont;
 %token<TEXT> stdinR;
+%token<TEXT> filePr;
 
 /* TIPOS GENERALES */
 %token<TEXT> likepath;
@@ -103,6 +106,7 @@ int yyerror(const char* mens) {
 %token<TEXT> letter;
 %token<TEXT> number;
 %token<TEXT> word;
+%token<TEXT> comment;
 
 /* TIPOS ESPECIALES */
 %type<TEXT> STRVALUE;
@@ -152,6 +156,9 @@ int yyerror(const char* mens) {
 %type<PROP> TOUCHPROP;
 %type<TEXT> CONTPARAM;
 
+/* OPCIONES PARA CAT */
+%type<FILELIST> FILELIST;
+
 %start START
 
 %left likepath word letter 
@@ -191,7 +198,8 @@ COMMANDS : COMMANDS COMMAND | COMMAND { };
 COMMAND : MKDISKCMD | RMDISKCMD | FDISKCMD 
 | MOUNTCMD | UNMOUNTCMD | MKFSCMD | MKDIRCMD 
 | LOGINCMD | LOGOUTCMD | MKUSRCMD | MKGRPCMD 
-| RMGRPCMD | RMUSRCMD | CHMODCMD | TOUCHCMD { };
+| RMGRPCMD | RMUSRCMD | CHMODCMD | TOUCHCMD 
+| CATCMD | comment { };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDISK */
@@ -433,6 +441,23 @@ TOUCHPROP : PATHPARAM { $$ = set_prop($1, (char*) "path"); }
 | stdinR { $$ = set_prop($1, (char*) "stdin"); };
 
 CONTPARAM : cont equals STRVALUE { $$ = $3; };
+
+/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
+/* CAT */
+CATCMD : cat FILELIST {
+    node_commands *node_cmd = new node_commands();
+    node_cmd->cat(*$2); 
+    delete node_cmd;
+}
+
+FILELIST : filePr number equals STRVALUE {
+    ListProp *props = new ListProp();
+    props->list.push_back($3);
+    $$ = props;
+} | FILELIST filePr number equals STRVALUE {
+    $1->list.push_back($4);
+    $$ = $1;
+};
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDIR */

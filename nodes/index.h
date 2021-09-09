@@ -9,6 +9,10 @@
 
 using namespace std;
 
+struct ListProp {
+  vector<string> list;
+};
+
 struct TouchProps {
   string path;
   bool r = 0;
@@ -40,9 +44,11 @@ public:
   void mkdir(string path, bool create);
   void mkfile(string content, string path, bool create);
   void touch(TouchProps props);
+  void cat(ListProp files);
 };
 
 extern void get_tree_graph();
 extern void print_bitmaps();
+extern bool has_permissions(Inode current_inode, int key);
 
 #endif // NODESCOMMANDS_H

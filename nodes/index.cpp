@@ -3,6 +3,7 @@
 #include "../utils/tools/index.h"
 #include "index.h"
 
+#include <bitset>
 #include <deque>
 #include <iostream>
 #include <math.h>
@@ -47,6 +48,36 @@ void print_bitmaps() {
     cout << "BITMAP DE INODOS:\n" << bitinodes << "\n\n";
     cout << "BITMAP DE BLOQUES:\n" << bitblocks << "\n";
   }
+}
+
+/**
+ * Tiene permisos
+ * @brief Verifica permisos en un inodo
+ * @param current_inode
+ */
+bool has_permissions(Inode current_inode, int key) {
+  // VERIFICAR PERMISOS
+  string perms = to_string(current_inode.perm);
+  string user_perm = bitset<3>((int)(perms.at(0) - '0')).to_string();
+  string group_perm = bitset<3>((int)(perms.at(1) - '0')).to_string();
+  string others_perm = bitset<3>((int)(perms.at(2) - '0')).to_string();
+
+  // USUARIO PROPIETARIO
+  bool is_perm = 0;
+  if (global_user.grp == "root" ||
+      ((user_perm.at(key) == '1' &&
+        (current_inode.uid == (int)stoi(global_user.uid))) ||
+       others_perm.at(key) == '1' ||
+       (group_perm.at(key) == '1' &&
+        (current_inode.gid == (int)stoi(global_user.gid))))) {
+    is_perm = 1;
+  }
+
+  if (!is_perm) {
+    print_err("NODES_ERR", "El usuario no tiene permisos de escritura.");
+  }
+
+  return is_perm;
 }
 
 /**
@@ -341,7 +372,7 @@ void node_commands::mkdir(string path, bool create) {
       first_inode.size = 0;
       first_inode.perm = 664;
       first_inode.uid = (int)stoi(global_user.uid);
-      first_inode.gid = (int)stoi(global_user.grp);
+      first_inode.gid = (int)stoi(global_user.gid);
 
       fseek(disk_file, superblock.inode_start, SEEK_SET);
       fwrite(&first_inode, sizeof(Inode), 1, disk_file);
@@ -687,6 +718,12 @@ void node_commands::mkfile(string content, string path, bool create) {
       }
     }
 
+    // VERIFICAR PERMISOS
+    if (!has_permissions(current_inode, 1)) {
+      print_err("NODES_ERR", "El usuario no tiene permisos de escritura.");
+      return;
+    }
+
     bool same_file = 0;
     bool is_new_block = 0;
     bool free_block_inside = 0;
@@ -982,4 +1019,141 @@ void node_commands::touch(TouchProps props) {
     mkfile(file_content, props.path, props.r);
   } else
     print_err("USER_ERR", "El parametro path es obligatorio.");
+}
+
+/**
+ * Leer archivo
+ * @brief retorna el contenido de un nodo
+ * @param {FILE*} disk_file
+ * @param {SuperBlock} superblock
+ * @param {string} path
+ */
+string get_file_content(FILE *disk_file, SuperBlock superblock, string path) {
+  // LEER SUPERBLOQUE
+  string file_content;
+
+  // EXISTE
+  if (disk_file != NULL) {
+    vector<string> path_components = split(path, '/');
+    int path_cmp_size = path_components.size();
+    path_components.at(0) = "/";
+
+    Inode parent_inode;
+    int inode_start = superblock.inode_start;
+
+    fseek(disk_file, inode_start, SEEK_SET);
+    fread(&parent_inode, sizeof(Inode), 1, disk_file);
+
+    // BUSCAR INODO
+    for (int path_index = 0; path_index < path_cmp_size; path_index++) {
+      for (int block_index = 0; block_index < 15; block_index++) {
+        if (parent_inode.block[block_index] != -1) {
+          DirBlock dir_block;
+          fseek(disk_file, parent_inode.block[block_index], SEEK_SET);
+          fread(&dir_block, sizeof(DirBlock), 1, disk_file);
+
+          // BUSCAR CONTENIDO
+          for (int content_index = 0; content_index < 4; content_index++) {
+            if (dir_block.content[content_index].inodo != -1) {
+              string block_name(dir_block.content[content_index].name);
+
+              if (block_name == path_components.at(path_index)) {
+                Inode tmp_inode;
+
+                fseek(disk_file, dir_block.content[content_index].inodo,
+                      SEEK_SET);
+                fread(&tmp_inode, sizeof(Inode), 1, disk_file);
+
+                // ES UN INODO DE CARPETA
+                if (tmp_inode.type == '1') {
+                  inode_start = dir_block.content[content_index].inodo;
+                  parent_inode = tmp_inode;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // BUSCAR SI ES UNA CARPETA O UN ARCHIVO
+    Inode first_inode = parent_inode;
+    for (int block_index = 0; block_index < 15; block_index++) {
+      if (first_inode.block[block_index] != -1) {
+        DirBlock dir_block;
+        bool find_block = 0;
+        fseek(disk_file, first_inode.block[block_index], SEEK_SET);
+        fread(&dir_block, sizeof(DirBlock), 1, disk_file);
+
+        // RECORRER CONTENIDO
+        for (int content_index = 0; content_index < 4; content_index++) {
+          if (dir_block.content[content_index].name ==
+              path_components.at(path_components.size() - 1)) {
+            inode_start = dir_block.content[content_index].inodo;
+            fseek(disk_file, inode_start, SEEK_SET);
+            fread(&first_inode, sizeof(Inode), 1, disk_file);
+
+            find_block = 1;
+            break;
+          }
+        }
+
+        if (find_block) {
+          break;
+        }
+      }
+    }
+
+    // OBTENER CONTENIDO
+    string block_content;
+    for (int block_index = 0; block_index < 15; block_index++) {
+      if (first_inode.block[block_index] != -1) {
+        FileBlock file_block;
+        fseek(disk_file, first_inode.block[block_index], SEEK_SET);
+        fread(&file_block, sizeof(FileBlock), 1, disk_file);
+
+        // CONTENT
+        string file_content = file_block.content;
+        block_content += file_content;
+      }
+    }
+
+    file_content = block_content;
+  }
+
+  // RETORNAR
+  return file_content;
+}
+
+/**
+ * Content
+ * @brief Obtener contenido de un archivo
+ * @param files
+ */
+void node_commands::cat(ListProp files) {
+  MountedPartition current_partition = get_current_partition(global_user.id);
+
+  // GLOBALES
+  string file_content;
+  SuperBlock superblock;
+  int partition_start = current_partition.start;
+  FILE *disk_file = fopen(current_partition.path.c_str(), "rb+");
+
+  // EXISTE
+  if (disk_file != NULL) {
+    // LEER SUPERBLOQUE
+    fseek(disk_file, partition_start, SEEK_SET);
+    fread(&superblock, sizeof(SuperBlock), 1, disk_file);
+
+    for (int file_index = 0; file_index < files.list.size(); file_index++) {
+      file_content +=
+          get_file_content(disk_file, superblock, files.list.at(file_index)) +
+          "\n";
+    }
+
+    fclose(disk_file);
+  }
+
+  // MOSTRAR CONTENIDO DE ARCHIVOS
+  cout << file_content;
 }

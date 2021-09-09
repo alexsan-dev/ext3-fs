@@ -61,5 +61,4 @@ int main(int argc, char *argv[]) {
   // stdin_content = content;
 
   read_test();
-  print_disks();
 }
