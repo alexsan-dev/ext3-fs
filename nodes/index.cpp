@@ -74,7 +74,14 @@ bool has_permissions(Inode current_inode, int key) {
   }
 
   if (!is_perm) {
-    print_err("NODES_ERR", "El usuario no tiene permisos de escritura.");
+    string msg;
+    if (key == 0)
+      msg = "lectura.";
+    else if (key == 1)
+      msg = "escritura.";
+    else if (key == 2)
+      msg = "ejecucion.";
+    print_err("NODES_ERR", "El usuario no tiene permisos de " + msg);
   }
 
   return is_perm;
@@ -1104,21 +1111,23 @@ string get_file_content(FILE *disk_file, SuperBlock superblock, string path) {
       }
     }
 
-    // OBTENER CONTENIDO
-    string block_content;
-    for (int block_index = 0; block_index < 15; block_index++) {
-      if (first_inode.block[block_index] != -1) {
-        FileBlock file_block;
-        fseek(disk_file, first_inode.block[block_index], SEEK_SET);
-        fread(&file_block, sizeof(FileBlock), 1, disk_file);
+    if (has_permissions(first_inode, 0)) {
+      // OBTENER CONTENIDO
+      string block_content;
+      for (int block_index = 0; block_index < 15; block_index++) {
+        if (first_inode.block[block_index] != -1) {
+          FileBlock file_block;
+          fseek(disk_file, first_inode.block[block_index], SEEK_SET);
+          fread(&file_block, sizeof(FileBlock), 1, disk_file);
 
-        // CONTENT
-        string file_content = file_block.content;
-        block_content += file_content;
+          // CONTENT
+          string file_content = file_block.content;
+          block_content += file_content;
+        }
       }
-    }
 
-    file_content = block_content;
+      file_content = block_content;
+    }
   }
 
   // RETORNAR

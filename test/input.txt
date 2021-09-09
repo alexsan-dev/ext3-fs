@@ -28,6 +28,6 @@ mkdir -path=/home/alex
 #este es un comentario
 
 touch -path=/home/test/test.txt -r -cont=/home/alex/Documentos/USAC/MIA/proyecto01_mia/test/file.txt
-chmod -path=/home/test -ugo=777
+chmod -path=/home/test/test.txt -ugo=333
 
 cat -file1=/home/test/test.txt -file2=/users.txt
