@@ -9,7 +9,10 @@ mkdisk -u=K -size=51200 -path=/home/archivos/fase2/Disco2.dk -f=FF
 #Crear particiones Disco1.dk
 fdisk -type=P -u=M -name=Part1 -size=20 -path=/home/archivos/fase2/Disco1.dk -f=BF
 fdisk -type=P -u=M -name=Part2 -size=15 -path=/home/archivos/fase2/Disco1.dk -f=BF
-fdisk -type=P -u=M -name=Part3 -size=20 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=E -u=M -name=Part3 -size=20 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=L -u=M -name=Part4 -size=10 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=L -u=M -name=Part5 -size=5 -path=/home/archivos/fase2/Disco1.dk -f=BF
+
 
 #Crear particiones Disco2.dk
 fdisk -type=P -u=M -name=Part1_D2 -size=20 -path=/home/archivos/fase2/Disco2.dk -f=BF
@@ -23,6 +26,7 @@ fdisk -type=P -u=M -name=Part3_D2 -size=10 -path=/home/archivos/fase2/Disco2.dk 
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part1 #173C
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part2 #173D
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part3 #173E
+mount -path=/home/archivos/fase2/Disco1.dk -name=Part4 #173F
 
 mount -path=/home/archivos/fase2/Disco2.dk -name=Part1_D2 #622a
 mount -path=/home/archivos/fase2/Disco2.dk -name=Part2_D2 #622b
@@ -166,4 +170,4 @@ Mkdir -P  -path=/home/archivos/mia/carpeta2/Esta/no/se/debe/crear/por/permisos
 #No debe dejar por permisos de lectura
 cat -file1="/home/b1.txt"
 
-rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/tree.svg -name=mbr -id=173C
+rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/mbr.svg -name="mbr" -id=173C

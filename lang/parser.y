@@ -493,14 +493,14 @@ MKDIRCMD : mkdir PATHPARAM pPr {
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* REP */
-REPCMD : touch REPPROPS { 
-    graph_comamnds *graph_cmd = new graph_comamnds();
+REPCMD : repR REPPROPS { 
+    graph_commands *graph_cmd = new graph_commands();
     graph_cmd->rep(*$2); 
     delete graph_cmd;
 };
 
 REPPROPS : REPPROP {
-    RepProps *props = new TouchProps();
+    RepProps *props = new RepProps();
     props->set_prop($1.value, $1.name);
     $$ = props;
 } | REPPROPS REPPROP {
@@ -508,7 +508,7 @@ REPPROPS : REPPROP {
     $$ = $1;
 };
 
-TOUCHPROP : NAMEPARAM { $$ = set_prop($1, (char*) "name"); }
+REPPROP : NAMEPARAM { $$ = set_prop($1, (char*) "name"); }
 | PATHPARAM { $$ = set_prop($1, (char*) "path"); }
 | IDPARAM { $$ = set_prop($1, (char*) "id"); }
 | RUTAPARAM { $$ = set_prop($1, (char*) "ruta"); }

@@ -2,7 +2,9 @@
 #include "../disks/index.h"
 #include "../env/index.h"
 #include "../utils/tools/index.h"
-#include "string"
+#include <string>
+
+using namespace std;
 
 graph_commands::graph_commands() {}
 
@@ -13,7 +15,9 @@ graph_commands::graph_commands() {}
  */
 void graph_commands::rep(RepProps props) {
   string name = props.name;
-  std::for_each(name.begin(), name.end(), [](char &c) { c = ::toupper(c); });
+  for(int char_index = 0; char_index < name.size(); char_index++){
+      name.at(char_index) = tolower(name.at(char_index));
+  }
 
   // BUSCAR DISCO Y PARTICION
   MountedPartition partition;
@@ -27,6 +31,6 @@ void graph_commands::rep(RepProps props) {
     disk_commands *disk_cmd = new disk_commands();
     disk_cmd->get_disk_graph(partition.path, props.path);
   } else {
-    print_err("REP_ERR", "No existe esta opcion disponible para el reporte.")
+    print_err("REP_ERR", "No existe esta opcion disponible para el reporte.");
   }
 }

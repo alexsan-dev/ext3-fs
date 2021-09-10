@@ -40,7 +40,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 33 "parser.y" /* yacc.c:1909  */
+#line 34 "parser.y" /* yacc.c:1909  */
 
     struct PropVariant {
         char *value;
@@ -72,32 +72,35 @@ extern int yydebug;
     cat = 273,
     mkdir = 274,
     execR = 275,
-    sizeP = 276,
-    path = 277,
-    unit = 278,
-    fit = 279,
-    type = 280,
-    name = 281,
-    add = 282,
-    del = 283,
-    idP = 284,
-    pPr = 285,
-    fs = 286,
-    pwd = 287,
-    user = 288,
-    usr = 289,
-    grp = 290,
-    ugo = 291,
-    rPr = 292,
-    cont = 293,
-    stdinR = 294,
-    filePr = 295,
-    likepath = 296,
-    strtext = 297,
-    letter = 298,
-    number = 299,
-    word = 300,
-    comment = 301
+    repR = 276,
+    sizeP = 277,
+    path = 278,
+    unit = 279,
+    fit = 280,
+    type = 281,
+    name = 282,
+    add = 283,
+    del = 284,
+    idP = 285,
+    pPr = 286,
+    fs = 287,
+    pwd = 288,
+    user = 289,
+    usr = 290,
+    grp = 291,
+    ugo = 292,
+    rPr = 293,
+    cont = 294,
+    stdinR = 295,
+    filePr = 296,
+    rootR = 297,
+    ruta = 298,
+    likepath = 299,
+    strtext = 300,
+    letter = 301,
+    number = 302,
+    word = 303,
+    comment = 304
   };
 #endif
 
@@ -106,7 +109,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 49 "parser.y" /* yacc.c:1909  */
+#line 50 "parser.y" /* yacc.c:1909  */
 
     struct PartitionCommandsProps *PTCMDPROPS;
     struct DiskCommandsProps *DKCMDPROPS;
@@ -115,11 +118,12 @@ union YYSTYPE
     struct MkUserProps *MKUSRCMDPROPS;
     struct ChmodProps *CHMODCMDPROPS;
     struct TouchProps *TOUCHCMDPROPS;
+    struct RepProps *REPCMDPROPS;
     struct ListProp *FILELIST;
     struct PropVariant PROP;
     char *TEXT;
 
-#line 123 "parser.h" /* yacc.c:1909  */
+#line 127 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

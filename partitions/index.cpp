@@ -792,61 +792,64 @@ void partition_commands::mkfs(PartitionFsProps props) {
         string current_date = get_now();
         strcpy(superblock.umtime, def_time.c_str());
 
-        fseek(disk_file, current_partition.start, SEEK_SET);
-        fwrite(&superblock, sizeof(SuperBlock), 1, disk_file);
+        if (current_partition.type != 'E') {
+          fseek(disk_file, current_partition.start, SEEK_SET);
+          fwrite(&superblock, sizeof(SuperBlock), 1, disk_file);
 
-        // CREAR INODOS Y BLOQUES
-        char bitinodes[n];
-        char bitblocks[3 * n];
-        for (int i = 0; i < n; i++)
-          bitinodes[i] = '0';
+          // CREAR INODOS Y BLOQUES
+          char bitinodes[n];
+          char bitblocks[3 * n];
+          for (int i = 0; i < n; i++)
+            bitinodes[i] = '0';
 
-        fseek(disk_file, superblock.bm_inode_start, SEEK_SET);
-        fwrite(&bitinodes, n, 1, disk_file);
+          fseek(disk_file, superblock.bm_inode_start, SEEK_SET);
+          fwrite(&bitinodes, n, 1, disk_file);
 
-        // BLOQUES
-        for (int i = 0; i < 3 * n; i++)
-          bitblocks[i] = '0';
+          // BLOQUES
+          for (int i = 0; i < 3 * n; i++)
+            bitblocks[i] = '0';
 
-        fseek(disk_file, superblock.bm_block_start, SEEK_SET);
-        fwrite(&bitblocks, 3 * n, 1, disk_file);
+          fseek(disk_file, superblock.bm_block_start, SEEK_SET);
+          fwrite(&bitblocks, 3 * n, 1, disk_file);
 
-        // JOURNALING
-        if (fs_type == 3) {
-          int journalstart = (current_partition.start + sizeof(SuperBlock));
-          Journal journal_data;
-          journal_data.operation[0] = '-';
-          journal_data.content[0] = '\0';
-          journal_data.permissions = -1;
-          journal_data.owner[0] = '\0';
-          journal_data.name[0] = '\0';
-          journal_data.date[0] = '\0';
-          journal_data.type = '-';
+          // JOURNALING
+          if (fs_type == 3) {
+            int journalstart = (current_partition.start + sizeof(SuperBlock));
+            Journal journal_data;
+            journal_data.operation[0] = '-';
+            journal_data.content[0] = '\0';
+            journal_data.permissions = -1;
+            journal_data.owner[0] = '\0';
+            journal_data.name[0] = '\0';
+            journal_data.date[0] = '\0';
+            journal_data.type = '-';
 
-          // ESCRIBO TODOS LOS JOURNAL
-          for (int i = 0; i < 100; i++) {
-            fseek(disk_file, (journalstart + (i * sizeof(Journal))), SEEK_SET);
-            fwrite(&journal_data, sizeof(Journal), 1, disk_file);
+            // ESCRIBO TODOS LOS JOURNAL
+            for (int i = 0; i < 100; i++) {
+              fseek(disk_file, (journalstart + (i * sizeof(Journal))),
+                    SEEK_SET);
+              fwrite(&journal_data, sizeof(Journal), 1, disk_file);
+            }
           }
+
+          fclose(disk_file);
+
+          // CREAR RUTA
+          node_commands *nodes_cmd = new node_commands();
+          nodes_cmd->mkdir("/", 0);
+
+          string def_users = "1,G,root\n1,U,root,root,123\n";
+          nodes_cmd->mkfile(def_users, "/users.txt", 1);
+
+          // CERRAR SESION
+          global_user.logged = 0;
+          global_user.uid = "";
+          global_user.user = "";
+          global_user.pwd = "";
+          global_user.grp = "";
+          global_user.id = "";
+          global_user.gid = "";
         }
-
-        fclose(disk_file);
-
-        // CREAR RUTA
-        node_commands *nodes_cmd = new node_commands();
-        nodes_cmd->mkdir("/", 0);
-
-        string def_users = "1,G,root\n1,U,root,root,123\n";
-        nodes_cmd->mkfile(def_users, "/users.txt", 1);
-
-        // CERRAR SESION
-        global_user.logged = 0;
-        global_user.uid = "";
-        global_user.user = "";
-        global_user.pwd = "";
-        global_user.grp = "";
-        global_user.id = "";
-        global_user.gid = "";
 
       } else
         print_err("PART_ERR", "El disco no existe.");

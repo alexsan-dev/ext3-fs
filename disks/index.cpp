@@ -16,18 +16,12 @@ disk_commands::disk_commands() {}
  * Imprimir EBR y Particiones
  * @param  {EBR} ebr_data
  */
-void disk_commands::get_ebr_graph(string path) {
-  // ABRIR MBR
-  MBR mbr_data;
-  int extended_start = 0;
-  FILE *disk_file = fopen(path.c_str(), "rb+");
+string get_ebr_graph(MBR mbr_data, FILE *disk_file) {
+  string dot_content;
+  int extended_start = -1;
 
   // EXISTE
   if (disk_file != NULL) {
-    // OBTENER MBR
-    fseek(disk_file, 0, SEEK_SET);
-    fread(&mbr_data, sizeof(MBR), 1, disk_file);
-
     // BUSCAR EXTENDIDA
     for (int partition_index = 0; partition_index < 4; partition_index++) {
       if (mbr_data.partitions[partition_index].status != '0')
@@ -38,14 +32,12 @@ void disk_commands::get_ebr_graph(string path) {
     }
 
     // POSICIONES DE EBRS
-    if (extended_start != 0) {
+    if (extended_start != -1) {
       int positions[max_logical_partitions] = {-1};
       for (int i = 0; i < max_logical_partitions; i++)
         positions[i] = -1;
       positions[0] = extended_start;
 
-      // IMPRIMIR EBR
-      cout << "\n\n--- PARTICIONES LOGICAS ---";
       for (int ebr_index = 0; ebr_index < max_logical_partitions - 1;
            ebr_index++) {
         if (positions[ebr_index] != -1) {
@@ -53,13 +45,34 @@ void disk_commands::get_ebr_graph(string path) {
           EBR ebr_data;
           fseek(disk_file, positions[ebr_index], SEEK_SET);
           fread(&ebr_data, sizeof(EBR), 1, disk_file);
+          string ebr_name(ebr_data.name);
 
           if (ebr_data.status == '1') {
-            // IMPRIMIR
-            cout << "\nName: " << ebr_data.name << "\nSize: " << ebr_data.size
-                 << "\nFit: " << ebr_data.fit << "\nStart: " << ebr_data.start
-                 << "\nStatus: " << ebr_data.status
-                 << "\nNext: " << ebr_data.next << "\n----";
+            if (ebr_index > 0 &&
+                ebr_name.find("Footer_") == std::string::npos) {
+
+              dot_content +=
+                  "EBR" + to_string(ebr_index) +
+                  " [shape=none, margin=0, label=<<table "
+                  "border=\"0\" "
+                  "cellborder=\"1\" cellspacing=\"0\" "
+                  "cellpadding=\"4\"><tr><td>Nombre</td><td>Valor</td></"
+                  "tr><tr><td>Status</td><td>" +
+                  ebr_data.status + "</td></tr><tr><td>Fit</td><td>" +
+                  ebr_data.fit + "</td></tr><tr><td>Start</td><td>" +
+                  to_string(ebr_data.start) +
+                  "</td></tr><tr><td>Size</td><td>" + to_string(ebr_data.size) +
+                  "</td></tr><tr><td>Next</td><td>" + to_string(ebr_data.next) +
+                  "</td></tr><tr><td>Name</td><td>" + ebr_data.name +
+                  "</td></tr></table>>]";
+
+              if (ebr_index == 1) {
+                dot_content += "EXT -> EBR1;";
+              } else {
+                dot_content += "EBR" + to_string(ebr_index - 1) + " -> EBR" +
+                               to_string(ebr_index);
+              }
+            }
 
             // SIGUIENTE
             positions[ebr_index + 1] = ebr_data.next;
@@ -69,6 +82,8 @@ void disk_commands::get_ebr_graph(string path) {
       }
     }
   }
+
+  return dot_content;
 }
 
 /**
@@ -83,25 +98,49 @@ void disk_commands::get_disk_graph(string disk_path, string path) {
 
   // EXISTE
   if (disk_file != NULL) {
+    string dot_path = "./reports/assets/";
+    string dot_name = dot_path + "mbr.dot";
+
     // OBTENER MBR
     fseek(disk_file, 0, SEEK_SET);
     fread(&mbr_data, sizeof(MBR), 1, disk_file);
-    FILE *dot_file = fopen(path.c_str(), "w+");
+    FILE *dot_file = fopen(dot_name.c_str(), "w+");
 
     if (dot_file != NULL) {
       // GENERAR DOT
-      string dot =
-          "digraph G {graph[rankdir=LR, overlap=false, "
-          "splines=true];node[shape = record, fontsize = 9, fontname "
-          "= \"Verdana\"]; [shape=none, margin=0, label=<<table "
-          "border=\"0\" "
-          "cellborder=\"1\" cellspacing=\"0\" "
-          "cellpadding=\"4\"><tr><td>Nombre</td></tr><tr><td>Valor</td></tr>" +
-          "<tr><td>Size</td></tr><tr><td>" + mbr_data.size "</td></tr>" +
-          "<tr><td>Creation Date</td></tr><tr><td>" +
-          mbr_data.date "</td></tr>" + "<tr><td>Signature</td></tr><tr><td>" +
-          mbr_data.signature "</td></tr>" + "<tr><td>Fit</td></tr><tr><td>" +
-          mbr_data.fit "</td></tr></table>>];}";
+      string dot = "digraph G {graph[rankdir=LR, overlap=false, "
+                   "splines=true];node[shape = record, fontsize = 9, fontname "
+                   "= \"Verdana\"]; MBR [shape=none, margin=0, label=<<table "
+                   "border=\"0\" "
+                   "cellborder=\"1\" cellspacing=\"0\" "
+                   "cellpadding=\"4\"><tr><td>Nombre</td><td>Valor</td></"
+                   "tr><tr><td>Size</td><td>" +
+                   to_string(mbr_data.size) + "</td></tr>" +
+                   "<tr><td>Creation Date</td><td>" + mbr_data.date +
+                   "</td></tr>" + "<tr><td>Signature</td><td>" +
+                   to_string(mbr_data.signature) + "</td></tr>" +
+                   "<tr><td>Fit</td><td>" + mbr_data.fit +
+                   "</td></tr></table>>];";
+
+      // PARTICIONES
+      for (int part_index = 0; part_index < 4; part_index++) {
+        Partition part = mbr_data.partitions[part_index];
+        string id = part.type == 'E' ? "EXT" : "Part" + to_string(part_index);
+        dot += id +
+               " [shape=none, margin=0, label=<<table "
+               "border=\"0\" "
+               "cellborder=\"1\" cellspacing=\"0\" "
+               "cellpadding=\"4\"><tr><td>Status</td><td>" +
+               part.status + "</td></tr><tr><td>Type</td><td>" + part.type +
+               "</td></tr><tr><td>Fit</td><td>" + part.fit +
+               "</td></tr><tr><td>Start</td><td>" + to_string(part.start) +
+               "</td></tr><tr><td>Size</td><td>" + to_string(part.size) +
+               "</td></tr><tr><td>Name</td><td>" + part.name +
+               "</td></tr></table>>];MBR -> " + id + ";";
+      }
+
+      dot += get_ebr_graph(mbr_data, disk_file);
+      dot += "}";
 
       fwrite(dot.c_str(), dot.length(), 1, dot_file);
       fclose(dot_file);

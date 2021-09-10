@@ -4,6 +4,8 @@
 
 #include "string"
 
+using namespace std;
+
 // PROPIEDADES
 struct RepProps {
   string name;
@@ -12,7 +14,7 @@ struct RepProps {
   string ruta;
   string root;
 
-  void set_props(string value, string key) {
+  void set_prop(string value, string key) {
     if (key == "name") {
       name = value;
     } else if (key == "path") {
