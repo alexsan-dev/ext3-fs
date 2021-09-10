@@ -1,7 +1,7 @@
+#include "index.h"
 #include "../env/index.h"
 #include "../users/index.h"
 #include "../utils/tools/index.h"
-#include "index.h"
 
 #include <bitset>
 #include <deque>
@@ -1125,6 +1125,12 @@ string get_file_content(FILE *disk_file, SuperBlock superblock, string path) {
           block_content += file_content;
         }
       }
+
+      // EDITAR INODO
+      string date_now = get_now();
+      strcpy(first_inode.atime, date_now.c_str());
+      fseek(disk_file, inode_start, SEEK_SET);
+      fwrite(&first_inode, sizeof(Inode), 1, disk_file);
 
       file_content = block_content;
     }

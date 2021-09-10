@@ -21,19 +21,7 @@ extern int col;
 extern int line;
 extern int yylineno;
 
-void print_disks() {
-  disk_commands *disk_cmd = new disk_commands();
-
-  disk_cmd->print_disk("/Disco01.disk");
-  disk_cmd->print_ebr("/Disco01.disk");
-}
-
-void read_test() {
-  // ABRIR
-  ifstream ifs("./test/input.txt");
-  string content((istreambuf_iterator<char>(ifs)),
-                 (istreambuf_iterator<char>()));
-
+void start_parse(string content) {
   // BUFFER
   YY_BUFFER_STATE buffer = yy_scan_string(content.c_str());
 
@@ -44,21 +32,29 @@ void read_test() {
 
   // PARSERAR
   yyparse();
-
-  // GRAFICAS
-  get_tree_graph();
 }
 
 int main(int argc, char *argv[]) {
   // LEER DE STDIN
-  // string content;
-  // string lineInput;
-  // while (getline(cin, lineInput)) {
-  // content += lineInput;
-  //}
+  string content;
+  string lineInput;
+  while (getline(cin, lineInput)) {
+    content += lineInput;
+  }
+
+  // EJECUTAR DIRECTAMENTE
+  std::vector<std::string> all_args;
+  if (argc > 1) {
+    all_args.assign(argv + 1, argv + argc);
+  }
+
+  string new_content;
+  for (int arg_index = 0; arg_index < all_args.size(); arg_index++) {
+    new_content += all_args.at(arg_index) + " ";
+  }
+
+  start_parse(new_content);
 
   // ASIGNAR A GLOBAL
-  // stdin_content = content;
-
-  read_test();
+  stdin_content = content;
 }

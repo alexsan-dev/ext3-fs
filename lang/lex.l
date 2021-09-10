@@ -43,6 +43,8 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "TOUCH" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return touch;}
 "CAT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return cat;}
 "MKDIR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mkdir;}
+"EXEC" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return execR;}
+"REP" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return repR;}
 
 "-DELETE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return del;}
 "-SIZE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return sizeP;}
@@ -64,6 +66,8 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "-CONT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return cont;}
 "-STDIN" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return stdinR;}
 "-FILE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return filePr;}
+"-ROOT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rootR;}
+"-RUTA" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return ruta;}
 
 {word} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return word;}
 {letter} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return letter;}

@@ -11,6 +11,8 @@
 
 #include "../permissions/index.h"
 #include "../partitions/index.h"
+#include "../utils/exec/index.h"
+#include "../graphs/index.h"
 #include "../groups/index.h"
 #include "../disks/index.h"
 #include "../nodes/index.h"
@@ -53,6 +55,7 @@ int yyerror(const char* mens) {
     struct MkUserProps *MKUSRCMDPROPS;
     struct ChmodProps *CHMODCMDPROPS;
     struct TouchProps *TOUCHCMDPROPS;
+    struct RepProps *REPCMDPROPS;
     struct ListProp *FILELIST;
     struct PropVariant PROP;
     char *TEXT;
@@ -78,6 +81,8 @@ int yyerror(const char* mens) {
 %token<TEXT> touch;
 %token<TEXT> cat;
 %token<TEXT> mkdir;
+%token<TEXT> execR;
+%token<TEXT> repR;
 
 %token<TEXT> sizeP;
 %token<TEXT> path;
@@ -99,6 +104,8 @@ int yyerror(const char* mens) {
 %token<TEXT> cont;
 %token<TEXT> stdinR;
 %token<TEXT> filePr;
+%token<TEXT> rootR;
+%token<TEXT> ruta;
 
 /* TIPOS GENERALES */
 %token<TEXT> likepath;
@@ -159,6 +166,12 @@ int yyerror(const char* mens) {
 /* OPCIONES PARA CAT */
 %type<FILELIST> FILELIST;
 
+/* OPCIONES REP */
+%type<REPCMDPROPS> REPPROPS;
+%type<PROP> REPPROP;
+%type<TEXT> ROOTPARAM;
+%type<TEXT> RUTAPARAM;
+
 %start START
 
 %left likepath word letter 
@@ -199,7 +212,7 @@ COMMAND : MKDISKCMD | RMDISKCMD | FDISKCMD
 | MOUNTCMD | UNMOUNTCMD | MKFSCMD | MKDIRCMD 
 | LOGINCMD | LOGOUTCMD | MKUSRCMD | MKGRPCMD 
 | RMGRPCMD | RMUSRCMD | CHMODCMD | TOUCHCMD 
-| CATCMD | comment { };
+| CATCMD | EXECCMD | REPCMD | comment { };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 /* MKDISK */
@@ -476,6 +489,38 @@ MKDIRCMD : mkdir PATHPARAM pPr {
     string path = $2;
     node_cmd->mkdir(path, 0); 
     delete node_cmd; 
+};
+
+/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
+/* REP */
+REPCMD : touch REPPROPS { 
+    graph_comamnds *graph_cmd = new graph_comamnds();
+    graph_cmd->rep(*$2); 
+    delete graph_cmd;
+};
+
+REPPROPS : REPPROP {
+    RepProps *props = new TouchProps();
+    props->set_prop($1.value, $1.name);
+    $$ = props;
+} | REPPROPS REPPROP {
+    $1->set_prop($2.value, $2.name);
+    $$ = $1;
+};
+
+TOUCHPROP : NAMEPARAM { $$ = set_prop($1, (char*) "name"); }
+| PATHPARAM { $$ = set_prop($1, (char*) "path"); }
+| IDPARAM { $$ = set_prop($1, (char*) "id"); }
+| RUTAPARAM { $$ = set_prop($1, (char*) "ruta"); }
+| ROOTPARAM { $$ = set_prop($1, (char*) "root"); };
+
+RUTAPARAM : ruta equals STRVALUE { $$ = $3; };
+ROOTPARAM : rootR equals STRVALUE { $$ = $3; };
+
+/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
+/* EXEC */
+EXECCMD : execR PATHPARAM {
+    exec_file($2);
 };
 
 %%

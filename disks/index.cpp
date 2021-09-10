@@ -16,7 +16,7 @@ disk_commands::disk_commands() {}
  * Imprimir EBR y Particiones
  * @param  {EBR} ebr_data
  */
-void disk_commands::print_ebr(string path) {
+void disk_commands::get_ebr_graph(string path) {
   // ABRIR MBR
   MBR mbr_data;
   int extended_start = 0;
@@ -76,31 +76,39 @@ void disk_commands::print_ebr(string path) {
  * @brief  Imprime toda la informacion del disco
  * @param  {MBR} mbr_data
  */
-void disk_commands::print_disk(string path) {
+void disk_commands::get_disk_graph(string disk_path, string path) {
   // ABRIR ARCHIVO
   MBR mbr_data;
-  FILE *disk_file = fopen(path.c_str(), "rb+");
+  FILE *disk_file = fopen(disk_path.c_str(), "rb+");
 
   // EXISTE
   if (disk_file != NULL) {
     // OBTENER MBR
     fseek(disk_file, 0, SEEK_SET);
     fread(&mbr_data, sizeof(MBR), 1, disk_file);
+    FILE *dot_file = fopen(path.c_str(), "w+");
 
-    // IMPRIMIR
-    cout << "--- MBR ---\n";
-    cout << "MBRSize: " << sizeof(MBR) << "\nDate: " << mbr_data.date
-         << "\nFit: " << mbr_data.fit << "\nSignature: " << mbr_data.signature
-         << "\nSize: " << mbr_data.size << "\n";
-    cout << "\n--- PARTICIONES ---";
-    for (int i = 0; i < 4; i++) {
-      cout << "\nName: " << mbr_data.partitions[i].name
-           << "\nSize: " << mbr_data.partitions[i].size
-           << "\nFit: " << mbr_data.partitions[i].fit
-           << "\nType: " << mbr_data.partitions[i].type
-           << "\nStart: " << mbr_data.partitions[i].start
-           << "\nStatus: " << mbr_data.partitions[i].status << '\n';
-      cout << "-----";
+    if (dot_file != NULL) {
+      // GENERAR DOT
+      string dot =
+          "digraph G {graph[rankdir=LR, overlap=false, "
+          "splines=true];node[shape = record, fontsize = 9, fontname "
+          "= \"Verdana\"]; [shape=none, margin=0, label=<<table "
+          "border=\"0\" "
+          "cellborder=\"1\" cellspacing=\"0\" "
+          "cellpadding=\"4\"><tr><td>Nombre</td></tr><tr><td>Valor</td></tr>" +
+          "<tr><td>Size</td></tr><tr><td>" + mbr_data.size "</td></tr>" +
+          "<tr><td>Creation Date</td></tr><tr><td>" +
+          mbr_data.date "</td></tr>" + "<tr><td>Signature</td></tr><tr><td>" +
+          mbr_data.signature "</td></tr>" + "<tr><td>Fit</td></tr><tr><td>" +
+          mbr_data.fit "</td></tr></table>>];}";
+
+      fwrite(dot.c_str(), dot.length(), 1, dot_file);
+      fclose(dot_file);
+
+      // GENERAR IMAGEN
+      string dot_svg = "dot -Tsvg " + dot_name + " -o " + path;
+      system(dot_svg.c_str());
     }
 
     // CERRAR
@@ -122,6 +130,10 @@ void disk_commands::mkdisk(DiskCommandsProps props) {
       EBR ebr_data;
       char buffer[1024];
       string disk_content = "";
+      string parent_dir = props.path.substr(0, props.path.find_last_of("/\\"));
+      string mkfiles = "mkdir -p " + parent_dir;
+      system(mkfiles.c_str());
+
       FILE *disk_file = fopen(props.path.c_str(), "wb");
 
       if (disk_file != NULL) {

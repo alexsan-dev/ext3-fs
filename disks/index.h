@@ -56,8 +56,8 @@ public:
 
   // METODOS
   void mkdisk(DiskCommandsProps props);
-  void print_disk(string path);
-  void print_ebr(string path);
+  void get_disk_graph(string path);
+  void get_ebr_graph(string path);
   void rmdisk(string path);
 };
 

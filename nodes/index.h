@@ -45,6 +45,7 @@ public:
   void mkfile(string content, string path, bool create);
   void touch(TouchProps props);
   void cat(ListProp files);
+  void rm(string path);
 };
 
 extern void get_tree_graph();
