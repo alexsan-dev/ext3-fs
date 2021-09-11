@@ -95,12 +95,14 @@ extern int yydebug;
     filePr = 296,
     rootR = 297,
     ruta = 298,
-    likepath = 299,
-    strtext = 300,
-    letter = 301,
-    number = 302,
-    word = 303,
-    comment = 304
+    mbr = 299,
+    sp = 300,
+    likepath = 301,
+    strtext = 302,
+    letter = 303,
+    number = 304,
+    word = 305,
+    comment = 306
   };
 #endif
 
@@ -123,7 +125,7 @@ union YYSTYPE
     struct PropVariant PROP;
     char *TEXT;
 
-#line 127 "parser.h" /* yacc.c:1909  */
+#line 129 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

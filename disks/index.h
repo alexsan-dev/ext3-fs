@@ -56,8 +56,11 @@ public:
 
   // METODOS
   void mkdisk(DiskCommandsProps props);
-  void get_disk_graph(string disk_path, string path);
   void rmdisk(string path);
 };
+
+extern void get_disk_graph(string disk_path, string path);
+extern void get_disk_table(string disk_path, string path);
+extern void get_disk_sp(string disk_path, string path, int part_start);
 
 #endif // DISKCOMMANDS_H

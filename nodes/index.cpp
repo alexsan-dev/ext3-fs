@@ -91,13 +91,12 @@ bool has_permissions(Inode current_inode, int key) {
  * Graficar
  * @brief Genera una grafica de arbol
  */
-void get_tree_graph() {
-  MountedPartition current_partition = get_current_partition(global_user.id);
-
+void get_tree_graph(string disk_path, string path, int part_start,
+                    string root) {
   // LEER SUPERBLOQUE
   SuperBlock superblock;
-  int partition_start = current_partition.start;
-  FILE *disk_file = fopen(current_partition.path.c_str(), "rb+");
+  int partition_start = part_start;
+  FILE *disk_file = fopen(disk_path.c_str(), "rb+");
 
   // EXISTE
   if (disk_file != NULL) {
@@ -125,15 +124,52 @@ void get_tree_graph() {
       fseek(disk_file, superblock.bm_block_start, SEEK_SET);
       fread(bitblocks, superblock.blocks_count, 1, disk_file);
 
-      Inode first_inode;
+      vector<string> path_components = split(root, '/');
+      int path_cmp_size = path_components.size();
+      path_components.at(0) = "/";
+
+      Inode parent_inode;
       int inode_start = superblock.inode_start;
+
       fseek(disk_file, inode_start, SEEK_SET);
-      fread(&first_inode, sizeof(Inode), 1, disk_file);
+      fread(&parent_inode, sizeof(Inode), 1, disk_file);
+
+      // BUSCAR INODO
+      for (int path_index = 0; path_index < path_cmp_size; path_index++) {
+        for (int block_index = 0; block_index < 15; block_index++) {
+          if (parent_inode.block[block_index] != -1) {
+            DirBlock dir_block;
+            fseek(disk_file, parent_inode.block[block_index], SEEK_SET);
+            fread(&dir_block, sizeof(DirBlock), 1, disk_file);
+
+            // BUSCAR CONTENIDO
+            for (int content_index = 0; content_index < 4; content_index++) {
+              if (dir_block.content[content_index].inodo != -1) {
+                string block_name(dir_block.content[content_index].name);
+
+                if (block_name == path_components.at(path_index)) {
+                  Inode tmp_inode;
+
+                  fseek(disk_file, dir_block.content[content_index].inodo,
+                        SEEK_SET);
+                  fread(&tmp_inode, sizeof(Inode), 1, disk_file);
+
+                  // ES UN INODO DE CARPETA
+                  if (tmp_inode.type == '1') {
+                    inode_start = dir_block.content[content_index].inodo;
+                    parent_inode = tmp_inode;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
       // RECORRER
       deque<Inode> inodes;
       deque<int> inode_starts;
-      inodes.push_back(first_inode);
+      inodes.push_back(parent_inode);
       inode_starts.push_back(inode_start);
 
       while (inodes.size() > 0) {
@@ -283,7 +319,7 @@ void get_tree_graph() {
       fclose(dot_file);
 
       // GENERAR IMAGEN
-      string dot_svg = "dot -Tsvg " + dot_name + " -o " + dot_path + "tree.svg";
+      string dot_svg = "dot -Tsvg " + dot_name + " -o " + path;
       system(dot_svg.c_str());
     }
 

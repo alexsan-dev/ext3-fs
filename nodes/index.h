@@ -48,7 +48,8 @@ public:
   void rm(string path);
 };
 
-extern void get_tree_graph();
+extern void get_tree_graph(string disk_path, string path, int part_start,
+                           string root = "/");
 extern void print_bitmaps();
 extern bool has_permissions(Inode current_inode, int key);
 

@@ -107,6 +107,10 @@ int yyerror(const char* mens) {
 %token<TEXT> rootR;
 %token<TEXT> ruta;
 
+/* MBR */
+%token<TEXT> mbr;
+%token<TEXT> sp;
+
 /* TIPOS GENERALES */
 %token<TEXT> likepath;
 %token<TEXT> strtext;
@@ -278,7 +282,11 @@ FDISKPROP : SIZEPARAM { $$ = set_prop($1, (char*) "size"); }
 
 TYPEPARAM : type equals letter { $$ = $3; };
 DELPARAM : del equals STRVALUE { $$ = $3; };
-NAMEPARAM : name equals STRVALUE { $$ = $3; };
+
+NAMEPARAM : name equals STRVALUE { $$ = $3; }
+| name equals mbr { $$ = (char*) "mbr"; };
+| name equals sp { $$ = (char*) "sp"; };
+
 ADDPARAM : add equals NUMVALUE { $$ = $3; };
 
 /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/

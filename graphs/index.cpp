@@ -1,6 +1,7 @@
 #include "index.h"
 #include "../disks/index.h"
 #include "../env/index.h"
+#include "../nodes/index.h"
 #include "../utils/tools/index.h"
 #include <string>
 
@@ -15,8 +16,8 @@ graph_commands::graph_commands() {}
  */
 void graph_commands::rep(RepProps props) {
   string name = props.name;
-  for(int char_index = 0; char_index < name.size(); char_index++){
-      name.at(char_index) = tolower(name.at(char_index));
+  for (int char_index = 0; char_index < name.size(); char_index++) {
+    name.at(char_index) = tolower(name.at(char_index));
   }
 
   // BUSCAR DISCO Y PARTICION
@@ -28,8 +29,13 @@ void graph_commands::rep(RepProps props) {
   }
 
   if (name == "mbr") {
-    disk_commands *disk_cmd = new disk_commands();
-    disk_cmd->get_disk_graph(partition.path, props.path);
+    get_disk_graph(partition.path, props.path);
+  } else if (name == "disk") {
+    get_disk_table(partition.path, props.path);
+  } else if (name == "tree") {
+    get_tree_graph(partition.path, props.path, partition.start, props.root);
+  } else if (name == "sp") {
+    get_disk_sp(partition.path, props.path, partition.start);
   } else {
     print_err("REP_ERR", "No existe esta opcion disponible para el reporte.");
   }

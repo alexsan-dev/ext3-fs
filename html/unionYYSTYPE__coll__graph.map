@@ -1,0 +1,12 @@
+<map id="YYSTYPE" name="YYSTYPE">
+<area shape="rect" id="node2" href="$structListProp.html" title="ListProp" alt="" coords="55,13,126,40"/>
+<area shape="rect" id="node3" href="$structTouchProps.html" title="TouchProps" alt="" coords="45,64,137,91"/>
+<area shape="rect" id="node4" href="$structPartitionFsProps.html" title="PartitionFsProps" alt="" coords="31,115,150,141"/>
+<area shape="rect" id="node5" href="$structMkUserProps.html" title="MkUserProps" alt="" coords="39,165,142,192"/>
+<area shape="rect" id="node6" href="$structUserCommandsProps.html" title="UserCommandsProps" alt="" coords="15,216,166,243"/>
+<area shape="rect" id="node7" href="$structChmodProps.html" title="ChmodProps" alt="" coords="41,267,140,293"/>
+<area shape="rect" id="node8" href="$structPartitionCommandsProps.html" title="PartitionCommandsProps" alt="" coords="5,317,176,344"/>
+<area shape="rect" id="node9" href="$structDiskCommandsProps.html" title="DiskCommandsProps" alt="" coords="15,368,166,395"/>
+<area shape="rect" id="node10" href="$structRepProps.html" title="RepProps" alt="" coords="51,419,131,445"/>
+<area shape="rect" id="node11" href="$structPropVariant.html" title="PropVariant" alt="" coords="45,469,136,496"/>
+</map>

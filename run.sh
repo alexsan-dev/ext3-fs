@@ -1,1 +1,1 @@
-echo "" | sudo ./main exec -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/test/input.txt
+echo "Hola mundo" | sudo ./main exec -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/test/input.txt

@@ -68,6 +68,8 @@ word [a-zA-ZÑñáéíóúÁÉÍÓÚ0-9]{3,}([a-zA-ZÑñáéíóúÁÉÍÓÚ0-9\
 "-FILE" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return filePr;}
 "-ROOT" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return rootR;}
 "-RUTA" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return ruta;}
+"MBR" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return mbr;}
+"SP" {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return sp;}
 
 {word} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return word;}
 {letter} {col += prevC;  prevC = strlen(yytext); yylval.TEXT = yytext; return letter;}

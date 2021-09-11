@@ -7,11 +7,13 @@ mkdisk -u=K -size=51200 -path=/home/archivos/fase2/Disco2.dk -f=FF
 
 #CREANDO PARTICIONES ----------------------------------------------------------------------------------
 #Crear particiones Disco1.dk
-fdisk -type=P -u=M -name=Part1 -size=20 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=P -u=M -name=Part1 -size=25 -path=/home/archivos/fase2/Disco1.dk -f=BF
 fdisk -type=P -u=M -name=Part2 -size=15 -path=/home/archivos/fase2/Disco1.dk -f=BF
 fdisk -type=E -u=M -name=Part3 -size=20 -path=/home/archivos/fase2/Disco1.dk -f=BF
-fdisk -type=L -u=M -name=Part4 -size=10 -path=/home/archivos/fase2/Disco1.dk -f=BF
-fdisk -type=L -u=M -name=Part5 -size=5 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=L -u=M -name=Partsd4 -size=10 -path=/home/archivos/fase2/Disco1.dk -f=BF
+fdisk -type=L -u=M -name=Partsd5 -size=5 -path=/home/archivos/fase2/Disco1.dk -f=BF
+
+fdisk  -type=P -name=Part1 -add=300 -u=K -path=/home/archivos/fase2/Disco1.dk  -f=BF
 
 
 #Crear particiones Disco2.dk
@@ -23,8 +25,8 @@ fdisk -type=P -u=M -name=Part3_D2 -size=10 -path=/home/archivos/fase2/Disco2.dk 
 
 #carnet de ejemplo 201709362 -> 62
 
-mount -path=/home/archivos/fase2/Disco1.dk -name=Part1 #173C
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part2 #173D
+mount -path=/home/archivos/fase2/Disco1.dk -name=Part1 #173C
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part3 #173E
 mount -path=/home/archivos/fase2/Disco1.dk -name=Part4 #173F
 
@@ -59,14 +61,13 @@ mkgrp -NamE=Arqui
 mkgrp -name="Compi 2"
 #Error en el mkgrp grupo ya existente
 mkgrp -name="Compi 2"
-Cat -file1=/users.txt
+Cat -file1=/users.txt -file2=/users.txt
 
 
 #Borrando Grupos
 #Error no existe este grupo
 rmgrp -name="DB2"
 rmgrp -name=Arqui
-Cat -file1=/users.txt
 
 
 #Crearemos 3 usuarios llamados user1, user2, user3
@@ -77,12 +78,10 @@ Mkusr -usr="user3" -grp="Compi 2" -pwd=user3
 Mkusr -usr="user2" -grp="Compi 2" -pwd=user2
 #Da error porque no existe ese grupo
 Mkusr -usr="user2" -grp=Arqui -pwd=user2
-Cat -file1=/users.txt
 
 
 rmusr -usr=user3
 rmusr -usr=user3 #Debe dar error porque ya no existe
-Cat -file1=/users.txt
 
 
 Mkdir -P  -path=/home/archivos/mia/fase2
@@ -150,7 +149,9 @@ Mkdir  -path=/home/archivos/mia/fase2/a46
 Mkdir  -path=/home/archivos/mia/fase2/a46
 
 logout
-loGin -usr=user1 -pwd=user1 -id=173C
+loGin -usr=root -pwd=123 -id=173C
+chmod -path=/home -ugo=001
+
 #Archivo 
 touch -path="/home/b1.txt" -size=75
 #Debe dar error ruta no existe
@@ -162,12 +163,15 @@ logout
 Login -pwd=123 -usr=root -id=173C
 #Chmod
 chmod -path=/home/archivos/mia/carpeta2 -ugo=001 -R
-chmod -path="/home/b1.txt" -ugo=001
+chmod -path="/home/b1.txt" -ugo=777
+
 logout
 loGin -usr=user1 -pwd=user1 -id=173C
 #No debe dejar por permisos de escritura
 Mkdir -P  -path=/home/archivos/mia/carpeta2/Esta/no/se/debe/crear/por/permisos
 #No debe dejar por permisos de lectura
-cat -file1="/home/b1.txt"
 
-rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/mbr.svg -name="mbr" -id=173C
+rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/mbr.svg -name=mbr -id=173C
+rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/disk.svg -name=disk -id=173C
+rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/tree.svg -root=/home -name=tree -id=173C
+rep -path=/home/alex/Documentos/USAC/MIA/proyecto01_mia/reports/assets/sp.svg -name=sp -id=173D

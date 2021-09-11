@@ -87,11 +87,218 @@ string get_ebr_graph(MBR mbr_data, FILE *disk_file) {
 }
 
 /**
+ * Imprimir EBR y Particiones
+ * @param  {EBR} ebr_data
+ */
+string get_ebr_table(MBR mbr_data, FILE *disk_file, int ext_size) {
+  string dot_content;
+  int extended_start = -1;
+
+  // EXISTE
+  if (disk_file != NULL) {
+    // BUSCAR EXTENDIDA
+    for (int partition_index = 0; partition_index < 4; partition_index++) {
+      if (mbr_data.partitions[partition_index].status != '0')
+        if (mbr_data.partitions[partition_index].type == 'E') {
+          extended_start = mbr_data.partitions[partition_index].start;
+          break;
+        }
+    }
+
+    // POSICIONES DE EBRS
+    if (extended_start != -1) {
+      int positions[max_logical_partitions] = {-1};
+      for (int i = 0; i < max_logical_partitions; i++)
+        positions[i] = -1;
+      positions[0] = extended_start;
+
+      for (int ebr_index = 0; ebr_index < max_logical_partitions - 1;
+           ebr_index++) {
+        if (positions[ebr_index] != -1) {
+          // BUSCAR EBR
+          EBR ebr_data;
+          fseek(disk_file, positions[ebr_index], SEEK_SET);
+          fread(&ebr_data, sizeof(EBR), 1, disk_file);
+          string ebr_name(ebr_data.name);
+
+          if (ebr_data.status == '1') {
+            if (ebr_index > 0 &&
+                ebr_name.find("Footer_") == std::string::npos) {
+              float ebr_per = ((float)ebr_data.size / ext_size) * 100;
+              dot_content +=
+                  "<td>" + ebr_name + " " + to_string(ebr_per) + " %</td>";
+            }
+
+            // SIGUIENTE
+            positions[ebr_index + 1] = ebr_data.next;
+          }
+        } else
+          break;
+      }
+    }
+  }
+
+  return dot_content;
+}
+
+/**
+ * Imprimir ESPACIOS EN DISCO
+ * @brief  Imprime todo el espacio en bloques del disco
+ * @param  {string} disk_path
+ * @param  {string} path
+ */
+void get_disk_sp(string disk_path, string path, int part_start) {
+  // LEER SUPERBLOQUE
+  SuperBlock superblock;
+  int partition_start = part_start;
+  FILE *disk_file = fopen(disk_path.c_str(), "rb+");
+
+  // EXISTE
+  if (disk_file != NULL) {
+    fseek(disk_file, partition_start, SEEK_SET);
+    fread(&superblock, sizeof(SuperBlock), 1, disk_file);
+
+    string dot_path = "./reports/assets/";
+    string dot_name = dot_path + "sp.dot";
+    FILE *dot_file = fopen(dot_name.c_str(), "w+");
+
+    // EXISTE
+    if (dot_file != NULL) {
+      // GENERAR DOT
+      string dot = "digraph G {graph[rankdir=LR, overlap=false, "
+                   "splines=true];node[shape = record, fontsize = 9, fontname "
+                   "= \"Verdana\"]; SP [shape=none, margin=0, label=<<table "
+                   "border=\"0\" "
+                   "cellborder=\"1\" cellspacing=\"0\" "
+                   "cellpadding=\"4\">";
+      dot +=
+          "<tr><td>Inodes count</td><td>" + to_string(superblock.inodes_count) +
+          "</td></tr>" + "<tr><td>Blocks count</td><td>" +
+          to_string(superblock.blocks_count) + "</td></tr>" +
+          "<tr><td>Free blocks count</td><td>" +
+          to_string(superblock.free_blocks_count) + "</td></tr>" +
+          "<tr><td>Free inodes count</td><td>" +
+          to_string(superblock.free_inodes_count) + "</td></tr>" +
+          "<tr><td>Mnt count</td><td>" + to_string(superblock.mount_count) +
+          "</td></tr><tr><td>Magic</td><td>0xEF53</td></tr>" +
+          "<tr><td>Inode size</td><td>" + to_string(superblock.inode_size) +
+          "</td></tr><tr><td>Block size</td><td>" +
+          to_string(superblock.block_size) + "</td></tr>" +
+          "<tr><td>First inode</td><td>" + to_string(superblock.first_inode) +
+          "</td></tr><tr><td>First block</td><td>" +
+          to_string(superblock.first_block) + "</td></tr>" +
+          "<tr><td>Bitmap inode start</td><td>" +
+          to_string(superblock.bm_inode_start) + "</td></tr>" +
+          "<tr><td>Bitmap block start</td><td>" +
+          to_string(superblock.bm_block_start) + "</td></tr>" +
+          "<tr><td>Inode start</td><td>" + to_string(superblock.inode_start) +
+          "</td></tr><tr><td>Block block start</td><td>" +
+          to_string(superblock.block_start) + "</td></tr>";
+
+      dot += "</table>>];}";
+      fwrite(dot.c_str(), dot.length(), 1, dot_file);
+      fclose(dot_file);
+
+      // GENERAR IMAGEN
+      string dot_svg = "dot -Tsvg " + dot_name + " -o " + path;
+      system(dot_svg.c_str());
+    }
+
+    fclose(disk_file);
+  }
+}
+
+/**
+ * Imprimir ESPACIOS EN DISCO
+ * @brief  Imprime todo el espacio en bloques del disco
+ * @param  {string} disk_path
+ * @param  {string} path
+ */
+void get_disk_table(string disk_path, string path) {
+  // ABRIR ARCHIVO
+  MBR mbr_data;
+  FILE *disk_file = fopen(disk_path.c_str(), "rb+");
+
+  // EXISTE
+  if (disk_file != NULL) {
+    string dot_path = "./reports/assets/";
+    string dot_name = dot_path + "disk.dot";
+
+    // OBTENER MBR
+    fseek(disk_file, 0, SEEK_SET);
+    fread(&mbr_data, sizeof(MBR), 1, disk_file);
+    FILE *dot_file = fopen(dot_name.c_str(), "w+");
+
+    if (dot_file != NULL) {
+      // GENERAR DOT
+      string dot = "digraph G {graph[rankdir=LR, overlap=false, "
+                   "splines=true];node[shape = record, fontsize = 9, fontname "
+                   "= \"Verdana\"]; DISK [shape=none, margin=0, label=<<table "
+                   "border=\"0\" "
+                   "cellborder=\"1\" cellspacing=\"0\" "
+                   "cellpadding=\"4\"><tr><td>" +
+                   disk_path + "</td></tr><tr><td>MBR</td>";
+
+      // ESPACIOS ENTRE PARTICIONES
+      int free_space_start = 161;
+      int free_space_end = 161;
+      for (int part_index = 0; part_index < 4; part_index++) {
+
+        free_space_end = mbr_data.partitions[part_index].start;
+
+        if ((free_space_end - free_space_start) > 0) {
+          float free_per =
+              ((free_space_end - free_space_start) / mbr_data.size) * 100;
+          dot += "<td>Libre " + to_string(free_per) + " %</td>";
+        }
+
+        if (mbr_data.partitions[part_index].status == '1') {
+          float part_per =
+              ((float)mbr_data.partitions[part_index].size / mbr_data.size) *
+              100;
+          string pType(1, mbr_data.partitions[part_index].type);
+          if (mbr_data.partitions[part_index].type != 'E') {
+
+            dot += "<td>Particion " + pType + " " + to_string(part_per) +
+                   " %</td>";
+          } else {
+            dot += "<td><table><tr><td>Particion "
+                   "Extendida</td></tr><tr>" +
+                   get_ebr_table(mbr_data, disk_file,
+                                 mbr_data.partitions[part_index].size) +
+                   "</tr></table></td>";
+          }
+
+        } else {
+          dot += "<td>Libre</td>";
+        }
+
+        free_space_start =
+            free_space_end + mbr_data.partitions[part_index].size + 1;
+      }
+
+      dot += "</tr></table>>];}";
+
+      fwrite(dot.c_str(), dot.length(), 1, dot_file);
+      fclose(dot_file);
+
+      // GENERAR IMAGEN
+      string dot_svg = "dot -Tsvg " + dot_name + " -o " + path;
+      system(dot_svg.c_str());
+    }
+
+    // CERRAR
+    fclose(disk_file);
+  }
+}
+
+/**
  * Imprimir MBR y Particiones
  * @brief  Imprime toda la informacion del disco
- * @param  {MBR} mbr_data
+ * @param  {string} disk_path
+ * @param  {string} path
  */
-void disk_commands::get_disk_graph(string disk_path, string path) {
+void get_disk_graph(string disk_path, string path) {
   // ABRIR ARCHIVO
   MBR mbr_data;
   FILE *disk_file = fopen(disk_path.c_str(), "rb+");

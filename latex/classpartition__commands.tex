@@ -1,0 +1,84 @@
+\hypertarget{classpartition__commands}{}\section{partition\+\_\+commands Class Reference}
+\label{classpartition__commands}\index{partition\+\_\+commands@{partition\+\_\+commands}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classpartition__commands_abdb0958853ae256735b9165cfcbf5a69}{fdisk} (\hyperlink{structPartitionCommandsProps}{Partition\+Commands\+Props} props, bool preserve=0)
+\begin{DoxyCompactList}\small\item\em Crea particiones en el mbr de un disco. \end{DoxyCompactList}\item 
+void \hyperlink{classpartition__commands_aa9a9c098b234aac9cf1d42aad40b1c9f}{mount} (string path, string name)
+\begin{DoxyCompactList}\small\item\em Monta una particion en memoria. \end{DoxyCompactList}\item 
+void \hyperlink{classpartition__commands_a41ba9bd1dfa43993e2969caac2a52250}{mkfs} (\hyperlink{structPartitionFsProps}{Partition\+Fs\+Props} props)
+\begin{DoxyCompactList}\small\item\em Crea superbloques, journal bloques e inodos. \end{DoxyCompactList}\item 
+void \hyperlink{classpartition__commands_a5caa41608c247eb70a6ea8120850924d}{unmount} (string id)
+\begin{DoxyCompactList}\small\item\em Monta una particion en memoria. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classpartition__commands_abdb0958853ae256735b9165cfcbf5a69}\label{classpartition__commands_abdb0958853ae256735b9165cfcbf5a69}} 
+\index{partition\+\_\+commands@{partition\+\_\+commands}!fdisk@{fdisk}}
+\index{fdisk@{fdisk}!partition\+\_\+commands@{partition\+\_\+commands}}
+\subsubsection{\texorpdfstring{fdisk()}{fdisk()}}
+{\footnotesize\ttfamily void partition\+\_\+commands\+::fdisk (\begin{DoxyParamCaption}\item[{\hyperlink{structPartitionCommandsProps}{Partition\+Commands\+Props}}]{props,  }\item[{bool}]{preserve = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+
+
+Crea particiones en el mbr de un disco. 
+
+Particiones de disco 
+\begin{DoxyParams}{Parameters}
+{\em \{\+Disk\+Commands\+Props\}} & disk\+\_\+data \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classpartition__commands_a41ba9bd1dfa43993e2969caac2a52250}\label{classpartition__commands_a41ba9bd1dfa43993e2969caac2a52250}} 
+\index{partition\+\_\+commands@{partition\+\_\+commands}!mkfs@{mkfs}}
+\index{mkfs@{mkfs}!partition\+\_\+commands@{partition\+\_\+commands}}
+\subsubsection{\texorpdfstring{mkfs()}{mkfs()}}
+{\footnotesize\ttfamily void partition\+\_\+commands\+::mkfs (\begin{DoxyParamCaption}\item[{\hyperlink{structPartitionFsProps}{Partition\+Fs\+Props}}]{props }\end{DoxyParamCaption})}
+
+
+
+Crea superbloques, journal bloques e inodos. 
+
+Crear sistema de archivos en particion 
+\begin{DoxyParams}{Parameters}
+{\em \{\+Partition\+Fs\+Props\}} & props \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classpartition__commands_aa9a9c098b234aac9cf1d42aad40b1c9f}\label{classpartition__commands_aa9a9c098b234aac9cf1d42aad40b1c9f}} 
+\index{partition\+\_\+commands@{partition\+\_\+commands}!mount@{mount}}
+\index{mount@{mount}!partition\+\_\+commands@{partition\+\_\+commands}}
+\subsubsection{\texorpdfstring{mount()}{mount()}}
+{\footnotesize\ttfamily void partition\+\_\+commands\+::mount (\begin{DoxyParamCaption}\item[{string}]{path,  }\item[{string}]{name }\end{DoxyParamCaption})}
+
+
+
+Monta una particion en memoria. 
+
+Montar particion 
+\begin{DoxyParams}{Parameters}
+{\em \{string\}} & path \\
+\hline
+{\em \{string\}} & name \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classpartition__commands_a5caa41608c247eb70a6ea8120850924d}\label{classpartition__commands_a5caa41608c247eb70a6ea8120850924d}} 
+\index{partition\+\_\+commands@{partition\+\_\+commands}!unmount@{unmount}}
+\index{unmount@{unmount}!partition\+\_\+commands@{partition\+\_\+commands}}
+\subsubsection{\texorpdfstring{unmount()}{unmount()}}
+{\footnotesize\ttfamily void partition\+\_\+commands\+::unmount (\begin{DoxyParamCaption}\item[{string}]{id }\end{DoxyParamCaption})}
+
+
+
+Monta una particion en memoria. 
+
+Desmontar particion 
+\begin{DoxyParams}{Parameters}
+{\em \{string\}} & id \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+partitions/index.\+h\item 
+partitions/index.\+cpp\end{DoxyCompactItemize}
